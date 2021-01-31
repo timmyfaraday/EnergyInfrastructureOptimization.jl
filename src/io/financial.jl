@@ -12,32 +12,20 @@
     EnergyInfrastructureOptimization.annuity_factor
 
 Annuity factor [yr] 
+
+The inverse of the annuity factor, i.e., 1€/AF, gives the yearly cost of 
+investing 1€ in year zero. 
 """
 annuity_factor(; Φ::Number, r::Number) =
     (((1 + r)^ustrip(u"yr", Φ) - 1) / (r * (1 + r)^ustrip(u"yr", Φ)))u"yr"
-
-# variable cost 
-"""
-    EnergyInfrastructureOptimization.variable_cost
-
-Variable cost [€/MWh]
-"""
-variable_cost(; E::Number, Q::Number, V::Number, p::Number) =
-    p * E * V / Q |> u"€/MWh"
-
-# fixed cost
-"""
-    EnergyInfrastructureOptimization.fixed_cost
-
-Fixed cost [€/MW/yr]
-"""
-fixed_cost(; I::Number, Q::Number, A::Number) =  I / Q / A |> u"€/MW/yr"
 
 # annual cost
 """
     EnergyInfrastructureOptimization.annual_cost
 
-Annual cost [u"€/MW/yr"]
+Annual cost [€/MW/yr]
+
+The annual cost is a linear cost function in function of time [hr] based on 
+cte fixed costs [€/MW/yr] and variable costs [€/MWh].
 """
-annual_cost(; fc::Number, vc::Number) = 
-    (t) -> fc + vc * uconvert("hr", t) / 1.0u"yr" |> u"€/MW/yr"
+annual_cost(; fc::Number, vc::Number) = (t) -> fc + vc * t |> u"€/MW/yr"

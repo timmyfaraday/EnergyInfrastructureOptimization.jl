@@ -10,41 +10,36 @@
 module EnergyInfrastructureOptimization
 
 # import pkgs
-import Distributions
+import Interpolations
+import JuMP
 import Measurements
 
 # using pkgs
-using  Unitful
-import Unitful: 𝐍
+using Clp
+using Unitful
+using UnitfulRecipes
+
 
 # pkg constants
-const _UF  = Unitful
+const _INT = Interpolations
+const _MSM = Measurements
 
 # paths
 const BASE_DIR = dirname(@__DIR__)
-
-# additional units
-@refunit    €           "€"         Euro        𝐍               true
-@unit       yr          "yr"        Year        31556926u"s"    false
-@unit       Wh          "Wh"        WattHour    3600u"J"        true
-
-# init function
-function __init__() 
-    Unitful.register(EnergyInfrastructureOptimization)
-end
 
 # include
 include("core/types.jl")
 
 include("io/financial.jl")
-include("io/physics.jl")
 include("io/technology.jl")
 
+include("prob/screening_curve.jl")
+
 # export
-export €, yr, Wh
+export BASE_DIR
 
-export Technology
+export CandidateTechnology, ExistingTechnology
 
-export screeningcurve
+export annuity_factor, screening_curve
 
 end

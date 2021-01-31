@@ -9,13 +9,3 @@
 
 # abstract types
 abstract type AbstractTechnology end
-
-# technology 
-struct Technology <: AbstractTechnology
-    name::String
-    fixed_cost::Number
-    variable_cost::Number
-    annual_cost::Function
-end
-Technology(; name::String, fc::Number, vc::Number) = 
-    Technology(name, fc, vc, annual_cost(fc = fc, vc = vc))
