@@ -52,9 +52,9 @@ function effective_capacity_cost!(ldc, inv, tech)
                         sum(fc[c] * Q[c] for c in C))
     JuMP.optimize!(m)
     # find the expected intersections τ
-    mo = ldc(zero(t[1])) .- cumsum(JuMP.value.(P[:,0.0u"hr/yr"]).data)u"MW"
-    println(JuMP.value.(P[:,0.0u"hr/yr"]).data)
-    τ  = inv.(mo)
+    mo  = cumsum(JuMP.value.(P[:,0.0u"hr/yr"]).data)u"MW"
+    println(mo)
+    τ   = inv.(mo)
     # find the duals of the ExistingTechnologies
     for n_n in 1:length(tech)-1 if tech[n_n] isa ExistingTechnology
         fc = max(tech[n_n].fc, fixed_cost(τ[n_n], tech[n_n], tech[n_n+1]))
@@ -73,7 +73,7 @@ function screening_curve(; ldc::Array, tech::Array)
     t = range(0.0u"hr/yr", 8760.0u"hr/yr", length=length(ldc))
     s = t[1:40:end]
     int = _INT.LinearInterpolation(t, ldc, extrapolation_bc = Line())
-    inv = _INT.LinearInterpolation(reverse(ldc), t, extrapolation_bc = Line())
+    inv = _INT.LinearInterpolation(reverse(ldc), reverse(t), extrapolation_bc = Line())
     # sort based on the merit order and eliminate inferior new units
     sort!(tech, by = x -> x.vc)
     deleteat!(tech, [any(x -> inferior(n_t,x), tech) for n_t in tech])

@@ -19,10 +19,10 @@ using Clp
 using Unitful
 using UnitfulRecipes
 
-
 # pkg constants
 const _INT = Interpolations
 const _MSM = Measurements
+const _UF  = Unitful
 
 # paths
 const BASE_DIR = dirname(@__DIR__)
