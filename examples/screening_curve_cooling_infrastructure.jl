@@ -4,22 +4,12 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 9e43a710-5fe7-11eb-10aa-f5243292af9a
-using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization, Measurements, Plots, Unitful, UnitfulRecipes
-
-# ╔═╡ 877fb5ee-5fe7-11eb-083e-e3cae9963594
-md"
-### Load the necessary packages
-"
-
 # ╔═╡ 3b32110e-652e-11eb-0488-e1c7286baa10
 begin
+	# import the package manager
 	import Pkg
 	Pkg.activate(mktempdir())
-end
-
-# ╔═╡ fcab2e30-652e-11eb-0ce4-31fefbcbc481
-begin
+	# add the necessary packages
 	Pkg.add("AdditionalUnits")
 	Pkg.add("CSV")
 	Pkg.add("DataFrames")
@@ -27,22 +17,23 @@ begin
 	Pkg.add("Plots")
 	Pkg.add("Unitful")
 	Pkg.add("UnitfulRecipes")
-end
-
-# ╔═╡ bc8bdff0-654e-11eb-05a1-0d07194a0c92
-begin
+	# build gr for all the beautiful plots
 	ENV["GRDIR"] = ""
 	Pkg.build("GR")
-end
-
-# ╔═╡ 60eb3e2e-652f-11eb-3d91-bd1356e21a03
-begin
+	# add the BASF Infrastructure Planning pkg
 	url = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
 	Pkg.add(url = url)
-end
+	# load all necessary packages
+	using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization
+	using Measurements, Plots, Unitful, UnitfulRecipes
+	# define a const for the BASF Infrastructure Planning pkg
+	const _EIO = EnergyInfrastructureOptimization
+end;
 
-# ╔═╡ e22a5c50-6553-11eb-0a97-25def43eb0df
-const _EIO = EnergyInfrastructureOptimization;
+# ╔═╡ 877fb5ee-5fe7-11eb-083e-e3cae9963594
+md"
+### Load the necessary packages
+"
 
 # ╔═╡ a568b610-5fe3-11eb-07bf-6dfbf5348457
 md"
@@ -174,13 +165,13 @@ begin
 	Φⁿ  = 50.0u"yr"									# lifetime
 	ΔTⁿ = 7.31u"K"									# temperature difference
 	
-	Vⁿ  = 3600.0 * (dⁿ / 2)^2 * π * vⁿ 				# flow rate
+	Vⁿ  = 3600.0u"s/hr" * (dⁿ / 2)^2 * π * vⁿ 		# flow rate
 	Qⁿ  = cp * ρ * Vⁿ * ΔTⁿ 						# cooling capacity 
 	
 	fcᵇ = fcᵖ + lⁿ * cⁿ / Qⁿ / annuity_factor(Φ = Φⁿ, r = r) |> u"€/MW/yr"
 end;
 
-# ╔═╡ 31605b40-5fe5-11eb-3e13-cf152fcd0a03
+# ╔═╡ c9138840-6558-11eb-10bf-e5a532ee083e
 BWS = CandidateTechnology(name = "BWS", fc = fcᵇ, vc = vcᵇ);
 
 # ╔═╡ 6029b3a0-5fe4-11eb-391f-c32e8d95a813
@@ -231,11 +222,6 @@ end
 # ╔═╡ Cell order:
 # ╟─877fb5ee-5fe7-11eb-083e-e3cae9963594
 # ╠═3b32110e-652e-11eb-0488-e1c7286baa10
-# ╠═fcab2e30-652e-11eb-0ce4-31fefbcbc481
-# ╠═bc8bdff0-654e-11eb-05a1-0d07194a0c92
-# ╠═60eb3e2e-652f-11eb-3d91-bd1356e21a03
-# ╠═9e43a710-5fe7-11eb-10aa-f5243292af9a
-# ╠═e22a5c50-6553-11eb-0a97-25def43eb0df
 # ╟─a568b610-5fe3-11eb-07bf-6dfbf5348457
 # ╟─2deaf150-5fea-11eb-3a98-33ddedb73941
 # ╠═648b8d10-6548-11eb-1cbd-9317d7b39a98
@@ -256,7 +242,7 @@ end
 # ╠═b4ea2420-5ff2-11eb-286b-01a08be859f7
 # ╟─4eebd770-5ff4-11eb-3683-b39940bc1c69
 # ╠═5bae4a60-5ff4-11eb-39c4-4fd884b569c8
-# ╠═31605b40-5fe5-11eb-3e13-cf152fcd0a03
+# ╠═c9138840-6558-11eb-10bf-e5a532ee083e
 # ╟─6029b3a0-5fe4-11eb-391f-c32e8d95a813
 # ╠═67216bc0-63eb-11eb-1119-21c28968c608
 # ╠═15cd3c90-5fea-11eb-231d-814a679dfe26
