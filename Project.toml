@@ -13,6 +13,7 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 UnitfulRecipes = "42071c24-d89e-48dd-8a24-8a12d9b8861f"
 
 [compat]
+AdditionalUnits = "0.1"
 Clp = "0.8.3"
 Interpolations = "0.13.1"
 JuMP = "0.21.6"
