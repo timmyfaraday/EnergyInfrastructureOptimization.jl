@@ -5,7 +5,29 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 9e43a710-5fe7-11eb-10aa-f5243292af9a
-using EnergyInfrastructureOptimization, Plots, Measurements, Unitful, UnitfulRecipes
+using AdditionalUnits, EnergyInfrastructureOptimization, HTTP, Measurements, Plots, Unitful, UnitfulRecipes
+
+# ╔═╡ 3b32110e-652e-11eb-0488-e1c7286baa10
+begin
+	import Pkg
+	Pkg.activate(mktempdir())
+end
+
+# ╔═╡ fcab2e30-652e-11eb-0ce4-31fefbcbc481
+begin
+	Pkg.add("AdditionalUnits")
+	Pkg.add("HTTP")
+	Pkg.add("Measurements")
+	Pkg.add("Plots")
+	Pkg.add("Unitful")
+	Pkg.add("UnitfulRecipes")
+end
+
+# ╔═╡ 60eb3e2e-652f-11eb-3d91-bd1356e21a03
+begin
+	path = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
+	Pkg.add(url = path)
+end
 
 # ╔═╡ a568b610-5fe3-11eb-07bf-6dfbf5348457
 md"
@@ -186,6 +208,9 @@ begin
 end
 
 # ╔═╡ Cell order:
+# ╠═3b32110e-652e-11eb-0488-e1c7286baa10
+# ╠═fcab2e30-652e-11eb-0ce4-31fefbcbc481
+# ╠═60eb3e2e-652f-11eb-3d91-bd1356e21a03
 # ╟─a568b610-5fe3-11eb-07bf-6dfbf5348457
 # ╟─877fb5ee-5fe7-11eb-083e-e3cae9963594
 # ╠═9e43a710-5fe7-11eb-10aa-f5243292af9a

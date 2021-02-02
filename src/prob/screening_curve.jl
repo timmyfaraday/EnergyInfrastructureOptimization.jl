@@ -40,10 +40,10 @@ function effective_capacity_cost!(ldc, inv, tech)
                     for n_t in tech)
     # optimization model
     m = JuMP.Model(Clp.Optimizer)
-    set_optimizer_attribute(m, "LogLevel", 0)
-    set_optimizer_attribute(m, "PrimalTolerance", 1e-10)
-    set_optimizer_attribute(m, "DualTolerance", 1e-10)
-    JuMP.@variable(m, 0.0 <= Q[c in C] <= ustrip.(u"MW",ldc(zero(t[1]))))
+    JuMP.set_optimizer_attribute(m, "LogLevel", 0)
+    JuMP.set_optimizer_attribute(m, "PrimalTolerance", 1e-10)
+    JuMP.set_optimizer_attribute(m, "DualTolerance", 1e-10)
+    JuMP.@variable(m, 0.0 <= Q[c in C] <= ustrip.(u"MW",ldc(T[1])))
     JuMP.@variable(m, 0.0 <= P[u in U, t in T] <= ustrip.(u"MW",ldc(t)))
     JuMP.@constraint(m, [c in C, t in T], P[c,t] <= Q[c])
     JuMP.@constraint(m, [e in E, t in T], P[e,t] <= cap[e])
@@ -53,7 +53,6 @@ function effective_capacity_cost!(ldc, inv, tech)
     JuMP.optimize!(m)
     # find the expected intersections τ
     mo  = cumsum(JuMP.value.(P[:,0.0u"hr/yr"]).data)u"MW"
-    println(mo)
     τ   = inv.(mo)
     # find the duals of the ExistingTechnologies
     for n_n in 1:length(tech)-1 if tech[n_n] isa ExistingTechnology
@@ -71,9 +70,8 @@ Screening curve
 function screening_curve(; ldc::Array, tech::Array)
     # interpolation of the ldc
     t = range(0.0u"hr/yr", 8760.0u"hr/yr", length=length(ldc))
-    s = t[1:40:end]
-    int = _INT.LinearInterpolation(t, ldc, extrapolation_bc = Line())
-    inv = _INT.LinearInterpolation(reverse(ldc), reverse(t), extrapolation_bc = Line())
+    int = _INT.LinearInterpolation(t, ldc, extrapolation_bc = _INT.Line())
+    inv = _INT.LinearInterpolation(reverse(ldc), reverse(t), extrapolation_bc = _INT.Line())
     # sort based on the merit order and eliminate inferior new units
     sort!(tech, by = x -> x.vc)
     deleteat!(tech, [any(x -> inferior(n_t,x), tech) for n_t in tech])

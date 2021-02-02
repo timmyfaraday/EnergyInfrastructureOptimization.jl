@@ -12,10 +12,11 @@ module EnergyInfrastructureOptimization
 # import pkgs
 import Interpolations
 import JuMP
-import Measurements
 
 # using pkgs
+using AdditionalUnits
 using Clp
+using Measurements
 using Unitful
 using UnitfulRecipes
 
