@@ -21,7 +21,7 @@ fixed_cost(τ::Number, t1::AbstractTechnology, t2::AbstractTechnology) =
 
 # inferior
 inferior(t1::AbstractTechnology, t2::AbstractTechnology) = 
-    (t1.fc < t2.fc) && (t1.vc < t2.vc) && t1 isa CandidateTechnology
+    (t1.fc > t2.fc) && (t1.vc > t2.vc) && t1 isa CandidateTechnology
 
 # effective_capacity_cost
 function effective_capacity_cost!(ldc, inv, tech)
@@ -53,11 +53,27 @@ function effective_capacity_cost!(ldc, inv, tech)
     JuMP.optimize!(m)
     # find the expected intersections τ
     mo  = cumsum(JuMP.value.(P[:,0.0u"hr/yr"]).data)u"MW"
+    println(mo)
     τ   = inv.(mo)
+    println(τ)
     # find the duals of the ExistingTechnologies
-    for n_n in 1:length(tech)-1 if tech[n_n] isa ExistingTechnology
-        fc = max(tech[n_n].fc, fixed_cost(τ[n_n], tech[n_n], tech[n_n+1]))
-        tech[n_n].fc, tech[n_n].ac = fc, annual_cost(fc = fc, vc = tech[n_n].vc)
+    Nt   = length(tech)
+    A, b = zeros(Nt,Nt), zeros(Nt)u"€/MW/yr"
+    n_n  = 1
+    for n_t in 1:length(τ) if τ[n_t] > 0.0u"hr/yr"
+        A[n_t,n_t], A[n_t,n_t+1] = 1, -1
+        b[n_t] = τ[n_t] * (tech[n_t+1].vc - tech[n_t].vc)
+        n_n += 1
+    end end
+    for n_t in 1:length(tech) if tech[n_t] isa CandidateTechnology
+        A[n_n,n_t], b[n_n] = 1, tech[n_t].fc
+        n_n += 1
+        if n_n > length(tech) break end 
+    end end
+    Fc = max.(zeros(length(b))u"€/MW/yr", A \ b)
+    println(Fc)
+    for n_t in 1:length(tech) if tech[n_t] isa ExistingTechnology
+        tech[n_t].fc, tech[n_t].ac = Fc[n_t], annual_cost(fc = Fc[n_t], vc = tech[n_t].vc)
     end end
 end
 
