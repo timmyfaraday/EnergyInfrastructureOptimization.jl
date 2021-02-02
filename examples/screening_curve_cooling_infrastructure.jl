@@ -5,29 +5,37 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 9e43a710-5fe7-11eb-10aa-f5243292af9a
-using AdditionalUnits, EnergyInfrastructureOptimization, HTTP, Measurements, Plots, Unitful, UnitfulRecipes
+using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization, Measurements, Plots, Unitful, UnitfulRecipes, UrlDownload
 
 # ╔═╡ 3b32110e-652e-11eb-0488-e1c7286baa10
 begin
 	import Pkg
-	Pkg.activate(mktempdir())
+	#Pkg.activate(mktempdir())
 end
 
 # ╔═╡ fcab2e30-652e-11eb-0ce4-31fefbcbc481
 begin
 	Pkg.add("AdditionalUnits")
-	Pkg.add("HTTP")
+	Pkg.add("CSV")
+	Pkg.add("DataFrames")
 	Pkg.add("Measurements")
 	Pkg.add("Plots")
 	Pkg.add("Unitful")
 	Pkg.add("UnitfulRecipes")
 end
 
+# ╔═╡ bc8bdff0-654e-11eb-05a1-0d07194a0c92
+begin
+	ENV["GRDIR"] = ""
+	Pkg.build("GR")
+end
+
 # ╔═╡ 60eb3e2e-652f-11eb-3d91-bd1356e21a03
 begin
-	path = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
-	Pkg.add(url = path)
-end
+	url = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
+	Pkg.add(url = url)
+	const _EIO = EnergyInfrastructureOptimization
+end;
 
 # ╔═╡ a568b610-5fe3-11eb-07bf-6dfbf5348457
 md"
@@ -48,14 +56,20 @@ md"
 ## Load duration curve
 "
 
+# ╔═╡ 648b8d10-6548-11eb-1cbd-9317d7b39a98
+year = 2013;
+
 # ╔═╡ 430e78e0-5fea-11eb-0c95-7b184b7962f0
-ldc = 
+begin
+	path = joinpath(_EIO.BASE_DIR,"examples/data/ldc.csv")
+	ldc  = CSV.read(path, DataFrame)[!,string(year)]u"MW"
+end;
 
 # ╔═╡ 0cdd11e0-5feb-11eb-14db-698c8ed68770
-s, t = (0.0:120.0:8760.0)u"hr/yr", (0.0:1.0:8760)u"hr/yr"
+t = range(0.0u"hr/yr",8760.0u"hr/yr",length=length(ldc));
 
 # ╔═╡ b600bde0-5fea-11eb-2d4c-9d3c873b7012
-plot(t, LDC)
+plot(t, ldc)
 
 # ╔═╡ fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
 md"
@@ -126,10 +140,40 @@ md"
 **PUMPING STATION**
 "
 
+# ╔═╡ b4ea2420-5ff2-11eb-286b-01a08be859f7
+begin
+	Eᵖ  = 0.1u"kWh/m^3" 							# electricity consumption
+	fᵖ  = 0.01009u"€/m^3"							# water consumption tax
+	Iᵖ  = 18.0u"M€"									# investment cost
+	Vᵖ  = 84000.0u"m^3/hr"							# flow rate
+	Φᵖ  = 16.0u"yr"									# lifetime
+	ΔTᵖ = 7.31u"K"									# temperature difference
+	
+	Qᵖ  = cp * ρ * Vᵖ * ΔTᵖ 						# cooling capacity
+	
+	fcᵖ  = Iᵖ / Qᵖ / annuity_factor(Φ = Φᵖ, r = r) |> u"€/MW/yr"
+	vcᵇ = (fᵖ + p * Eᵖ) * Vᵖ / Qᵖ |> u"€/MWh"
+end
+
 # ╔═╡ 4eebd770-5ff4-11eb-3683-b39940bc1c69
 md"
 **PIPING NETWORK**
 "
+
+# ╔═╡ 5bae4a60-5ff4-11eb-39c4-4fd884b569c8
+begin
+	dⁿ  = 2.0u"m"									# diameter of a pipe
+	cⁿ  = 10000.0u"€/m"								# cost of piping per meter
+	lⁿ  = 2500.0u"m"								# length of piping on-site
+	vⁿ  = 2.0u"m/s"									# flow velocity
+	Φⁿ  = 50.0u"yr"									# lifetime
+	ΔTⁿ = 7.31u"K"									# temperature difference
+	
+	Vⁿ  = 3600.0 * (dⁿ / 2)^2 * π * vⁿ 				# flow rate
+	Qⁿ  = cp * ρ * Vⁿ * ΔTⁿ 						# cooling capacity 
+	
+	fcᵇ = fcᵖ + lⁿ * cⁿ / Qⁿ / annuity_factor(Φ = Φⁿ, r = r) |> u"€/MW/yr"
+end;
 
 # ╔═╡ 31605b40-5fe5-11eb-3e13-cf152fcd0a03
 BWS = ExistingTechnology(name = "BWS", cap = 100.0u"MW", vc = vcᵇ)
@@ -177,44 +221,16 @@ begin
           subplot=2)
 end
 
-# ╔═╡ b4ea2420-5ff2-11eb-286b-01a08be859f7
-begin
-	Eᵖ  = 0.1u"kWh/m^3" 							# electricity consumption
-	fᵖ  = 0.01009u"€/m^3"							# water consumption tax
-	Iᵖ  = 18.0u"M€"									# investment cost
-	Vᵖ  = 84000.0u"m^3/hr"							# flow rate
-	Φᵖ  = 16.0u"yr"									# lifetime
-	ΔTᵖ = 7.31u"K"									# temperature difference
-	
-	Qᵖ  = cp * ρ * Vᵖ * ΔTᵖ 						# cooling capacity
-	
-	fcᵇ = Iᵖ / Qᵖ / annuity_factor(Φ = Φᵖ, r = r) |> u"€/MW/yr"
-	vcᵇ = (fᵖ + p * Eᵖ) * Vᵖ / Qᵖ |> u"€/MWh"
-end
-
-# ╔═╡ 5bae4a60-5ff4-11eb-39c4-4fd884b569c8
-begin
-	dⁿ  = 2.0u"m"									# diameter of a pipe
-	cⁿ  = 10000.0u"€/m"								# cost of piping per meter
-	lⁿ  = 2500.0u"m"								# length of piping on-site
-	vⁿ  = 2.0u"m/s"									# flow velocity
-	Φⁿ  = 50.0u"yr"									# lifetime
-	ΔTⁿ = 7.31u"K"									# temperature difference
-	
-	Vⁿ  = 3600.0 * (dⁿ / 2)^2 * π * vⁿ 				# flow rate
-	Qⁿ  = cp * ρ * Vⁿ * ΔTⁿ 						# cooling capacity 
-	
-	fcᵇ += lⁿ * cⁿ / Qⁿ / annuity_factor(Φ = Φⁿ, r = r) |> u"€/MW/yr"
-end
-
 # ╔═╡ Cell order:
 # ╠═3b32110e-652e-11eb-0488-e1c7286baa10
 # ╠═fcab2e30-652e-11eb-0ce4-31fefbcbc481
+# ╠═bc8bdff0-654e-11eb-05a1-0d07194a0c92
 # ╠═60eb3e2e-652f-11eb-3d91-bd1356e21a03
 # ╟─a568b610-5fe3-11eb-07bf-6dfbf5348457
 # ╟─877fb5ee-5fe7-11eb-083e-e3cae9963594
 # ╠═9e43a710-5fe7-11eb-10aa-f5243292af9a
 # ╟─2deaf150-5fea-11eb-3a98-33ddedb73941
+# ╠═648b8d10-6548-11eb-1cbd-9317d7b39a98
 # ╠═430e78e0-5fea-11eb-0c95-7b184b7962f0
 # ╠═0cdd11e0-5feb-11eb-14db-698c8ed68770
 # ╠═b600bde0-5fea-11eb-2d4c-9d3c873b7012
