@@ -79,7 +79,7 @@ In the following cell some general constants are defined. The user can freely ad
 # ╔═╡ b11439be-5fee-11eb-0fb4-bd6d7ede7ef7
 begin
 	r  = 0.075 										# interest rate
-	p  = (51.38±5.0)u"€/MWh"								# electricity price
+	p  = (51.38±5.0)u"€/MWh"						# electricity price
 	ρ  = 997u"kg/m^3"								# density of water
 	cp = 4.186u"kJ/kg/K"							# specific heat of water
 end;
