@@ -39,7 +39,7 @@ end
 begin
 	url = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
 	Pkg.add(url = url)
-end;
+end
 
 # ╔═╡ e22a5c50-6553-11eb-0a97-25def43eb0df
 const _EIO = EnergyInfrastructureOptimization;
@@ -71,7 +71,10 @@ end;
 t = range(0.0u"hr/yr",8760.0u"hr/yr",length=length(ldc));
 
 # ╔═╡ b600bde0-5fea-11eb-2d4c-9d3c873b7012
-plot(t, ldc)
+plot(t, ldc, 
+	 xlabel="time", ylabel="power demand", 
+	 ylim=(0.0u"MW",maximum(ldc)),
+	 legend=false)
 
 # ╔═╡ fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
 md"
@@ -198,6 +201,8 @@ md"
 
 # ╔═╡ 83f77870-63eb-11eb-2253-0da01bf3ec0c
 begin
+	# reduced time
+	s = t[1:140:end]
 	# plots - layout
 	plot(layout=(2,1))
 	# plots - data
@@ -236,7 +241,7 @@ end
 # ╠═648b8d10-6548-11eb-1cbd-9317d7b39a98
 # ╠═430e78e0-5fea-11eb-0c95-7b184b7962f0
 # ╠═0cdd11e0-5feb-11eb-14db-698c8ed68770
-# ╠═b600bde0-5fea-11eb-2d4c-9d3c873b7012
+# ╟─b600bde0-5fea-11eb-2d4c-9d3c873b7012
 # ╟─fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
 # ╟─ed3d3a00-5fee-11eb-32d7-91ecff6be0eb
 # ╠═b11439be-5fee-11eb-0fb4-bd6d7ede7ef7
@@ -256,4 +261,4 @@ end
 # ╠═67216bc0-63eb-11eb-1119-21c28968c608
 # ╠═15cd3c90-5fea-11eb-231d-814a679dfe26
 # ╟─72fe39a0-63eb-11eb-1cc9-77f392b90442
-# ╠═83f77870-63eb-11eb-2253-0da01bf3ec0c
+# ╟─83f77870-63eb-11eb-2253-0da01bf3ec0c
