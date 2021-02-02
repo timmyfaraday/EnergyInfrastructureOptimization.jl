@@ -92,7 +92,7 @@ begin
 	p  = 51.38u"€/MWh"								# electricity price
 	ρ  = 997u"kg/m^3"								# density of water
 	cp = 4.186u"kJ/kg/K"							# specific heat of water
-end
+end;
 
 # ╔═╡ 3fe978e0-5fef-11eb-257d-298d726aa4a7
 md"
@@ -110,10 +110,10 @@ begin
 	
 	fcˡ = Iˡ / Qˡ / annuity_factor(Φ = Φˡ, r = r) |> u"€/MW/yr"
 	vcˡ = p * Eˡ * Vˡ / Qˡ |> u"€/MWh"
-end
+end;
 
 # ╔═╡ 285a1080-5fe6-11eb-3927-dde8671180b2
-LCT = CandidateTechnology(name = "LCT", fc = fcˡ, vc = vcˡ)
+LCT = CandidateTechnology(name = "LCT", fc = fcˡ, vc = vcˡ);
 
 # ╔═╡ b79754b0-5ff0-11eb-2dbd-5d0ff8216bc1
 md"
@@ -130,10 +130,10 @@ begin
 	
 	fcˢ = Iˢ / Qˢ / annuity_factor(Φ = Φˢ, r = r) |> u"€/MW/yr"
 	vcˢ = p * Eˢ / cp / ρ / ΔTˢ |> u"€/MWh"
-end
+end;
 
 # ╔═╡ 7adb6440-5fe5-11eb-23d0-1759c5ba2f45
-SCT = CandidateTechnology(name = "SCT", fc = fcˢ, vc = vcˢ)
+SCT = CandidateTechnology(name = "SCT", fc = fcˢ, vc = vcˢ);
 
 # ╔═╡ 637553d0-5ff2-11eb-0503-df2ff89fbd6c
 md"
@@ -158,7 +158,7 @@ begin
 	
 	fcᵖ  = Iᵖ / Qᵖ / annuity_factor(Φ = Φᵖ, r = r) |> u"€/MW/yr"
 	vcᵇ = (fᵖ + p * Eᵖ) * Vᵖ / Qᵖ |> u"€/MWh"
-end
+end;
 
 # ╔═╡ 4eebd770-5ff4-11eb-3683-b39940bc1c69
 md"
@@ -181,7 +181,7 @@ begin
 end;
 
 # ╔═╡ 31605b40-5fe5-11eb-3e13-cf152fcd0a03
-BWS = ExistingTechnology(name = "BWS", cap = 100.0u"MW", vc = vcᵇ)
+BWS = CandidateTechnology(name = "BWS", fc = fcᵇ, vc = vcᵇ);
 
 # ╔═╡ 6029b3a0-5fe4-11eb-391f-c32e8d95a813
 md"
@@ -189,7 +189,7 @@ md"
 "
 
 # ╔═╡ 67216bc0-63eb-11eb-1119-21c28968c608
-tech = [LCT, SCT, BWS]
+tech = [LCT, SCT, BWS];
 
 # ╔═╡ 15cd3c90-5fea-11eb-231d-814a679dfe26
 τ, κ = screening_curve(ldc = ldc, tech = tech)
