@@ -4,7 +4,7 @@
 using Markdown
 using InteractiveUtils
 
-# ╔═╡ 3b32110e-652e-11eb-0488-e1c7286baa10
+# ╔═╡ 0d0274f0-6561-11eb-1cc6-651967cb6a49
 begin
 	# import the package manager
 	import Pkg
@@ -33,6 +33,8 @@ end;
 # ╔═╡ 877fb5ee-5fe7-11eb-083e-e3cae9963594
 md"
 ### Load the necessary packages
+
+All necessary packages are loaded by in the cell below, if this pluto script is excecuted via binder, this will take approximately **400 seconds**. Feel free to read through the script and become familiar with its features. Once all bars on the left hand of each cell have turned solid gray, all the code is loaded and the user can start altering the script.
 "
 
 # ╔═╡ a568b610-5fe3-11eb-07bf-6dfbf5348457
@@ -47,7 +49,9 @@ For a detailed discussion on the topic, the reader is referred to the master the
 # ╔═╡ 2deaf150-5fea-11eb-3a98-33ddedb73941
 md"
 ## Load duration curve
-"
+
+The available load duration curves are the ones from the master thesis of Jan Gagelmans, the user can choose between years 2013, 2014, 2015 and 2016 by entering the year in the cell below, e.g., year = 2015."
+
 
 # ╔═╡ 648b8d10-6548-11eb-1cbd-9317d7b39a98
 year = 2013;
@@ -56,34 +60,50 @@ year = 2013;
 begin
 	path = joinpath(_EIO.BASE_DIR,"examples/data/ldc.csv")
 	ldc  = CSV.read(path, DataFrame)[!,string(year)]u"MW"
-end;
-
-# ╔═╡ 0cdd11e0-5feb-11eb-14db-698c8ed68770
-t = range(0.0u"hr/yr",8760.0u"hr/yr",length=length(ldc));
-
-# ╔═╡ b600bde0-5fea-11eb-2d4c-9d3c873b7012
-plot(t, ldc, 
-	 xlabel="time", ylabel="power demand", 
-	 ylim=(0.0u"MW",maximum(ldc)),
-	 legend=false)
-
-# ╔═╡ fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
-md"
-## Defining the different technologies
-"
+	t = range(0.0u"hr/yr",8760.0u"hr/yr",length=length(ldc))
+	plot(t, ldc, 
+	 		xlabel="time", ylabel="power demand", 
+	 		ylim=(0.0u"MW",maximum(ldc)),
+	 		legend=false)
+end
 
 # ╔═╡ ed3d3a00-5fee-11eb-32d7-91ecff6be0eb
 md"
-**GENERAL CONSTANTS**
+## General constants
+In the following cell some general constants are defined. The user can freely add constants, following the these rules:
+- the variable name, e.g., r for interest rate, must be unique throughout the script;
+- if a variable has a unit, e.g., MW, it is added after the value as u\"MW\" ; and
+- if a variable has an uncertainty range, e.g., the electricity price can be 5€/MWh more or less than expected, is obtained by changing p = 51.38u\"€/MWh\" into p = (51.38 ± 5.0)u\"€/MWh\". The operator ± can be obtained by \pm followed by tab.
 "
 
 # ╔═╡ b11439be-5fee-11eb-0fb4-bd6d7ede7ef7
 begin
 	r  = 0.075 										# interest rate
-	p  = 51.38u"€/MWh"								# electricity price
+	p  = (51.38±5.0)u"€/MWh"								# electricity price
 	ρ  = 997u"kg/m^3"								# density of water
 	cp = 4.186u"kJ/kg/K"							# specific heat of water
 end;
+
+# ╔═╡ fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
+md"
+## Defining the different technologies
+
+Two classes of technologies exist: ExistingTechnology and CandidateTechnology. An ExistingTechnology is a technology which is already in the system, and is defined by its unique name [String], its capacity [Number] and its variable cost [Number]. For example:
+
+```
+eLTC = ExistingTechnology(name = \"eLTC\", vc = 100.0u\"€/MWh\", cap = 100u\"MW\")
+```
+
+An CandidateTechnology is a technology which is not yet in the system, and is defined by its unique name [String], its fixed cost [Number] and its variable cost [Number]. For example:
+
+```
+LTC = ExistingTechnology(name = \"LTC\", vc = 100.0u\"€/MWh\", fc = 1000.0u\"€/MW/yr\")
+```
+
+Before the definition of each technology an additional cell is included to allow for some preemptive calculation of the necessary attributes. A cell is simply added following another by clicking the plus button on the bottom left of the previous cell.
+
+Any cell's console output is surpressed by ending it with ;
+"
 
 # ╔═╡ 3fe978e0-5fef-11eb-257d-298d726aa4a7
 md"
@@ -174,16 +194,21 @@ end;
 # ╔═╡ c9138840-6558-11eb-10bf-e5a532ee083e
 BWS = CandidateTechnology(name = "BWS", fc = fcᵇ, vc = vcᵇ);
 
-# ╔═╡ 6029b3a0-5fe4-11eb-391f-c32e8d95a813
+# ╔═╡ bc2d38a0-6563-11eb-0879-2bbe9de01667
 md"
-## Perform the screening curve analysis
+### Collect all relevant technologies in an array
 "
 
 # ╔═╡ 67216bc0-63eb-11eb-1119-21c28968c608
 tech = [LCT, SCT, BWS];
 
+# ╔═╡ 6029b3a0-5fe4-11eb-391f-c32e8d95a813
+md"
+## Perform the screening curve analysis
+"
+
 # ╔═╡ 15cd3c90-5fea-11eb-231d-814a679dfe26
-τ, κ = screening_curve(ldc = ldc, tech = tech)
+τ, κ = screening_curve(ldc = ldc, tech = tech);
 
 # ╔═╡ 72fe39a0-63eb-11eb-1cc9-77f392b90442
 md"
@@ -205,11 +230,11 @@ begin
               subplot=2)
 	end 
 	scatter!(τ,zero(τ)u"MW",
-             xlabel="", ylabel="",
+             xlabel="", ylabel="capacity",
              label="",
              subplot=1)
 	scatter!(τ,zero(τ)u"€/MW/yr",
-             xlabel="time", ylabel="annual cost",
+             xlabel="time", ylabel="cost",
              label="",
              subplot=2)
 	# plots cosmetics
@@ -219,18 +244,29 @@ begin
           subplot=2)
 end
 
+# ╔═╡ 3febf530-6566-11eb-2d17-1d076ea7542f
+md"
+**RAPPORT**
+"
+
+# ╔═╡ 6122ce7e-6567-11eb-1448-5bc13a06a68f
+map(1:length(tech)) do n_n
+	n_name = tech[n_n].name
+	n_cap  = round(u"MW",κ[n_n])
+	n_n == 1 ? n_time = t[end] : n_time = round(u"hr/yr",τ[n_n-1]) ;
+	md"$(n_name) works for $(n_time) with a capacity of $(n_cap)"
+end
+
 # ╔═╡ Cell order:
 # ╟─877fb5ee-5fe7-11eb-083e-e3cae9963594
-# ╠═3b32110e-652e-11eb-0488-e1c7286baa10
+# ╟─0d0274f0-6561-11eb-1cc6-651967cb6a49
 # ╟─a568b610-5fe3-11eb-07bf-6dfbf5348457
 # ╟─2deaf150-5fea-11eb-3a98-33ddedb73941
 # ╠═648b8d10-6548-11eb-1cbd-9317d7b39a98
-# ╠═430e78e0-5fea-11eb-0c95-7b184b7962f0
-# ╠═0cdd11e0-5feb-11eb-14db-698c8ed68770
-# ╟─b600bde0-5fea-11eb-2d4c-9d3c873b7012
-# ╟─fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
+# ╟─430e78e0-5fea-11eb-0c95-7b184b7962f0
 # ╟─ed3d3a00-5fee-11eb-32d7-91ecff6be0eb
 # ╠═b11439be-5fee-11eb-0fb4-bd6d7ede7ef7
+# ╟─fd0b1c60-5fe7-11eb-0f0a-775a5ac2cddc
 # ╟─3fe978e0-5fef-11eb-257d-298d726aa4a7
 # ╠═1045f480-5fed-11eb-3e0c-e77e1bb28a0a
 # ╠═285a1080-5fe6-11eb-3927-dde8671180b2
@@ -243,8 +279,11 @@ end
 # ╟─4eebd770-5ff4-11eb-3683-b39940bc1c69
 # ╠═5bae4a60-5ff4-11eb-39c4-4fd884b569c8
 # ╠═c9138840-6558-11eb-10bf-e5a532ee083e
-# ╟─6029b3a0-5fe4-11eb-391f-c32e8d95a813
+# ╟─bc2d38a0-6563-11eb-0879-2bbe9de01667
 # ╠═67216bc0-63eb-11eb-1119-21c28968c608
+# ╟─6029b3a0-5fe4-11eb-391f-c32e8d95a813
 # ╠═15cd3c90-5fea-11eb-231d-814a679dfe26
 # ╟─72fe39a0-63eb-11eb-1cc9-77f392b90442
 # ╟─83f77870-63eb-11eb-2253-0da01bf3ec0c
+# ╟─3febf530-6566-11eb-2d17-1d076ea7542f
+# ╟─6122ce7e-6567-11eb-1448-5bc13a06a68f
