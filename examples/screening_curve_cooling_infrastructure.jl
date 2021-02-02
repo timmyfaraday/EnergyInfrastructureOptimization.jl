@@ -7,6 +7,11 @@ using InteractiveUtils
 # ╔═╡ 9e43a710-5fe7-11eb-10aa-f5243292af9a
 using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization, Measurements, Plots, Unitful, UnitfulRecipes
 
+# ╔═╡ 877fb5ee-5fe7-11eb-083e-e3cae9963594
+md"
+### Load the necessary packages
+"
+
 # ╔═╡ 3b32110e-652e-11eb-0488-e1c7286baa10
 begin
 	import Pkg
@@ -34,8 +39,10 @@ end
 begin
 	url = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
 	Pkg.add(url = url)
-	const _EIO = EnergyInfrastructureOptimization
 end;
+
+# ╔═╡ e22a5c50-6553-11eb-0a97-25def43eb0df
+const _EIO = EnergyInfrastructureOptimization;
 
 # ╔═╡ a568b610-5fe3-11eb-07bf-6dfbf5348457
 md"
@@ -44,11 +51,6 @@ md"
 This script enables the evaluation of different cooling technologies using the screening curve method. The screening curve method is an intuitive and fast model that estimates the least cost cooling technology mix based on their annual fixed and variable costs. 
 
 For a detailed discussion on the topic, the reader is referred to the master thesis: *Screening curve method for cooling power - a BASF Antwerp application* by Jan Gagelmans.
-"
-
-# ╔═╡ 877fb5ee-5fe7-11eb-083e-e3cae9963594
-md"
-### Load the necessary packages
 "
 
 # ╔═╡ 2deaf150-5fea-11eb-3a98-33ddedb73941
@@ -222,13 +224,14 @@ begin
 end
 
 # ╔═╡ Cell order:
+# ╟─877fb5ee-5fe7-11eb-083e-e3cae9963594
 # ╠═3b32110e-652e-11eb-0488-e1c7286baa10
 # ╠═fcab2e30-652e-11eb-0ce4-31fefbcbc481
 # ╠═bc8bdff0-654e-11eb-05a1-0d07194a0c92
 # ╠═60eb3e2e-652f-11eb-3d91-bd1356e21a03
-# ╟─a568b610-5fe3-11eb-07bf-6dfbf5348457
-# ╟─877fb5ee-5fe7-11eb-083e-e3cae9963594
 # ╠═9e43a710-5fe7-11eb-10aa-f5243292af9a
+# ╠═e22a5c50-6553-11eb-0a97-25def43eb0df
+# ╟─a568b610-5fe3-11eb-07bf-6dfbf5348457
 # ╟─2deaf150-5fea-11eb-3a98-33ddedb73941
 # ╠═648b8d10-6548-11eb-1cbd-9317d7b39a98
 # ╠═430e78e0-5fea-11eb-0c95-7b184b7962f0
