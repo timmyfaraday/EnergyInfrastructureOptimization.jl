@@ -5,12 +5,12 @@ using Markdown
 using InteractiveUtils
 
 # ╔═╡ 9e43a710-5fe7-11eb-10aa-f5243292af9a
-using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization, Measurements, Plots, Unitful, UnitfulRecipes, UrlDownload
+using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization, Measurements, Plots, Unitful, UnitfulRecipes
 
 # ╔═╡ 3b32110e-652e-11eb-0488-e1c7286baa10
 begin
 	import Pkg
-	#Pkg.activate(mktempdir())
+	Pkg.activate(mktempdir())
 end
 
 # ╔═╡ fcab2e30-652e-11eb-0ce4-31fefbcbc481
