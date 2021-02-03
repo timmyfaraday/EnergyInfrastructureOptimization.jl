@@ -17,6 +17,7 @@ UnitfulRecipes = "42071c24-d89e-48dd-8a24-8a12d9b8861f"
 
 [compat]
 Clp = "0.8.3"
+DataFrames = "0.22"
 Interpolations = "0.13.1"
 JuMP = "0.21.6"
 Measurements = "2.5.0"
