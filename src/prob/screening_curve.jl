@@ -17,7 +17,7 @@ intersection(t1::AbstractTechnology, t2::AbstractTechnology) =
 
 # fixed_cost
 fixed_cost(τ::Number, t1::AbstractTechnology, t2::AbstractTechnology) =
-    τ * (t2.vc-t1.vc) + t2.fc  |> u"€/MW/yr"
+    τ * (t2.vc-t1.vc) + t2.fc  |> unit(t1.fc)
 
 # inferior
 inferior(t1::AbstractTechnology, t2::AbstractTechnology) = 
@@ -32,33 +32,33 @@ function effective_capacity_cost!(ldc, inv, tech)
     U   = [n_t.name for n_t in tech]
     # parameters
     dt  = ustrip.(u"hr/yr",step(T))
-    cap = Dict(n_t.name => _UF.ustrip(u"MW", n_t.capacity)
+    cap = Dict(n_t.name => _UF.ustrip(unit(ldc[1]), n_t.capacity)
                     for n_t in tech if n_t isa ExistingTechnology)
-    fc  = Dict(n_t.name => _MSM.value(_UF.ustrip(u"€/MW/yr", n_t.fc)) 
+    fc  = Dict(n_t.name => _MSM.value(_UF.ustrip(unit(tech[1].fc), n_t.fc)) 
                     for n_t in tech if n_t isa CandidateTechnology)
-    vc  = Dict(n_t.name => _MSM.value(_UF.ustrip(u"€/MWh", n_t.vc))
+    vc  = Dict(n_t.name => _MSM.value(_UF.ustrip(unit(tech[1].vc), n_t.vc))
                     for n_t in tech)
     # optimization model
     m = JuMP.Model(Clp.Optimizer)
     JuMP.set_optimizer_attribute(m, "LogLevel", 0)
     JuMP.set_optimizer_attribute(m, "PrimalTolerance", 1e-10)
     JuMP.set_optimizer_attribute(m, "DualTolerance", 1e-10)
-    JuMP.@variable(m, 0.0 <= Q[c in C] <= ustrip.(u"MW",ldc(T[1])))
-    JuMP.@variable(m, 0.0 <= P[u in U, t in T] <= ustrip.(u"MW",ldc(t)))
+    JuMP.@variable(m, 0.0 <= Q[c in C] <= ustrip.(unit(ldc[1]),ldc(T[1])))
+    JuMP.@variable(m, 0.0 <= P[u in U, t in T] <= ustrip.(unit(ldc[1]),ldc(t)))
     JuMP.@constraint(m, [c in C, t in T], P[c,t] <= Q[c])
     JuMP.@constraint(m, [e in E, t in T], P[e,t] <= cap[e])
-    JuMP.@constraint(m, [t in T], sum(P[u,t] for u in U) == ustrip.(u"MW",ldc(t)))
+    JuMP.@constraint(m, [t in T], sum(P[u,t] for u in U) == ustrip.(unit(ldc[1]),ldc(t)))
     JuMP.@objective(m, Min, sum(dt * vc[u] * P[u,t] for u in U, t in T) +
                         sum(fc[c] * Q[c] for c in C))
     JuMP.optimize!(m)
     # find the expected intersections τ
-    mo  = cumsum(JuMP.value.(P[:,0.0u"hr/yr"]).data)u"MW"
+    mo  = cumsum(JuMP.value.(P[:,0.0u"hr/yr"]).data)unit(ldc[1])
     println(mo)
     τ   = inv.(mo)
     println(τ)
     # find the duals of the ExistingTechnologies
     Nt   = length(tech)
-    A, b = zeros(Nt,Nt), zeros(Nt)u"€/MW/yr"
+    A, b = zeros(Nt,Nt), zeros(Nt)unit(tech[1].fc)
     n_n  = 1
     for n_t in 1:length(τ) if τ[n_t] > 0.0u"hr/yr"
         A[n_t,n_t], A[n_t,n_t+1] = 1, -1
@@ -70,7 +70,7 @@ function effective_capacity_cost!(ldc, inv, tech)
         n_n += 1
         if n_n > length(tech) break end 
     end end
-    Fc = max.(zeros(length(b))u"€/MW/yr", A \ b)
+    Fc = max.(zeros(length(b))unit(tech[1].fc), A \ b)
     println(Fc)
     for n_t in 1:length(tech) if tech[n_t] isa ExistingTechnology
         tech[n_t].fc, tech[n_t].ac = Fc[n_t], annual_cost(fc = Fc[n_t], vc = tech[n_t].vc)
@@ -99,7 +99,7 @@ function screening_curve(; ldc::Array, tech::Array)
     τ = [intersection(tech[n_n], tech[n_n+1]) for n_n in 1:length(tech)-1]
     τ = min.(8766.0u"hr/yr", τ)
     κ = [(int(lb(n_τ))+int(ub(n_τ)))/2 ± (int(lb(n_τ))-int(ub(n_τ))) for n_τ in τ]
-    κ = diff([0.0u"MW", κ..., ldc[1]])
+    κ = diff([0.0unit(ldc[1]), κ..., ldc[1]])
     # return results
     return τ, κ
 end

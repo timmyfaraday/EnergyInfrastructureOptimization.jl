@@ -28,4 +28,4 @@ Annual cost [€/MW/yr]
 The annual cost is a linear cost function in function of time [hr] based on 
 cte fixed costs [€/MW/yr] and variable costs [€/MWh].
 """
-annual_cost(; fc::Number, vc::Number) = (t) -> fc + vc * t |> u"€/MW/yr"
+annual_cost(; fc::Number, vc::Number) = (t) -> fc + vc * t |> unit(fc)

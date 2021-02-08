@@ -31,5 +31,7 @@ mutable struct ExistingTechnology <: AbstractTechnology
     name::String
     vc::Number
 end
-ExistingTechnology(; name::String, cap::Number, vc::Number) = 
-    ExistingTechnology(annual_cost(fc = 0.0u"€/MW/yr", vc = vc), cap, 0.0u"€/MW/yr", name, vc)
+function ExistingTechnology(; name::String, cap::Number, vc::Number)
+    fc = (0.0)unit(vc)*u"hr/yr"
+    return ExistingTechnology(annual_cost(fc = fc, vc = vc), cap, fc, name, vc)
+end
