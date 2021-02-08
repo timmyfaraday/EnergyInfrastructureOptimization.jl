@@ -11,8 +11,9 @@ begin
 	Pkg.activate(mktempdir())
 	# add the necessary packages
 	Pkg.add("AdditionalUnits")
-	Pkg.add("CSV")
-	Pkg.add("DataFrames")
+	#Pkg.add("CSV")
+	#Pkg.add("DataFrames")
+	Pkg.add("DelimitedFiles")
 	Pkg.add("Measurements")
 	Pkg.add("Plots")
 	Pkg.add("Unitful")
@@ -24,7 +25,8 @@ begin
 	url = "https://github.com/timmyfaraday/EnergyInfrastructureOptimization.jl.git"
 	Pkg.add(url = url)
 	# load all necessary packages
-	using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization
+	#using AdditionalUnits, CSV, DataFrames, EnergyInfrastructureOptimization
+	using AdditionalUnits, DelimitedFiles, EnergyInfrastructureOptimization
 	using Measurements, Plots, Unitful, UnitfulRecipes
 	# define a const for the BASF Infrastructure Planning pkg
 	const _EIO = EnergyInfrastructureOptimization
@@ -59,7 +61,9 @@ year = 2013;
 # ╔═╡ 430e78e0-5fea-11eb-0c95-7b184b7962f0
 begin
 	path = joinpath(_EIO.BASE_DIR,"examples/data/ldc.csv")
-	ldc  = CSV.read(path, DataFrame)[!,string(year)]u"MW"
+	key  = Dict(2013 => 1, 2014 => 2, 2015 => 3, 2016 => 4)
+	ldc  = readdlm(path, ',', skipstart = 1)[:,key[year]]u"MW"
+	#ldc  = CSV.read(path, DataFrame)[!,string(year)]u"MW"
 	t = range(0.0u"hr/yr",8760.0u"hr/yr",length=length(ldc))
 	plot(t, ldc, 
 	 		xlabel="time", ylabel="power demand", 
